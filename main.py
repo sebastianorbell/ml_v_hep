@@ -7,22 +7,32 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
 
-
+# Define dataloader
+#---------------------------------------------------------------
 root = '/Users/sebastianorbell/PycharmProjects/ml_v_hep/data/numpy'
 
-qcd_file = '/train_QCD_preproccesed_data.npy'
-ww_file = '/train_WW_preproccesed_data.npy'
+qcd_file_train = '/train_QCD_preproccesed_data.npy'
+ww_file_train = '/train_WW_preproccesed_data.npy'
+
+qcd_file_test = '/test_QCD_preproccesed_data.npy'
+ww_file_test = '/test_WW_preproccesed_data.npy'
+
 classes = ['QCD', 'WW']
 
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.05), (0.5))])
 
-trainDataset = jetDataset(root+qcd_file, root+ww_file, root, transform=transform)
+trainDataset = jetDataset(root+qcd_file_train, root+qcd_file_train, root, transform=transform)
 
 trainloader = torch.utils.data.DataLoader(trainDataset, batch_size=4,
                                           shuffle=True)
 
+testDataset = jetDataset(root+qcd_file_test, root+qcd_file_test, root, transform=transform)
 
+testloader = torch.utils.data.DataLoader(testDataset, batch_size=4,
+                                          shuffle=True)
+
+#---------------------------------------------------------------
 # get some random training images
 dataiter = iter(trainloader)
 data = dataiter.next()
@@ -33,14 +43,22 @@ imshow(np.squeeze(data['image'].numpy()), labels=labels)
 # print labels
 print(' '.join('%5s' % classes[int(data['label'][j])] for j in range(4)))
 
-
+# Define network
+#---------------------------------------------------------------
 net = Net()
 
+#Define loss function
+#---------------------------------------------------------------
 import torch.optim as optim
-
 criterion = nn.CrossEntropyLoss()
+
+#Define optimiser
+#---------------------------------------------------------------
+
 optimizer = optim.SGD(net.parameters(), lr=0.0001, momentum=0.9)
 
+# Train network
+#---------------------------------------------------------------
 loss_list = []
 for epoch in range(2):  # loop over the dataset multiple times
     running_loss = 0.0
@@ -70,10 +88,16 @@ plt.plot(loss_list, '*')
 plt.show()
 print('Finished Training')
 
+# Save model
+#---------------------------------------------------------------
+
 PATH = 'savedModels/jet.pth'
 torch.save(net.state_dict(), PATH)
 
-dataiter = iter(trainloader)
+
+# Fetch a test image
+#---------------------------------------------------------------
+dataiter = iter(testloader)
 data = dataiter.next()
 
 # show images
@@ -83,9 +107,13 @@ imshow(np.squeeze(data['image'].numpy()), labels=labels)
 print(' '.join('%5s' % classes[int(data['label'][j])] for j in range(4)))
 
 
+# Load trained network
+#---------------------------------------------------------------
 net = Net()
 net.load_state_dict(torch.load(PATH))
 
+# Predict classification with trained network
+#---------------------------------------------------------------
 outputs = net(data['image'])
 
 _, predicted = torch.max(outputs, 1)
@@ -93,10 +121,12 @@ _, predicted = torch.max(outputs, 1)
 print('Predicted: ', ' '.join('%5s' % classes[predicted[j]]
                               for j in range(4)))
 
+# Evaluate classification accuracy with test data
+#---------------------------------------------------------------
 correct = 0
 total = 0
 with torch.no_grad():
-    for data in trainloader:
+    for data in testloader:
         images, labels = data['image'], data['label']
         outputs = net(images)
         _, predicted = torch.max(outputs.data, 1)

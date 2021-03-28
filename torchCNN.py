@@ -22,5 +22,6 @@ class Net(nn.Module):
         x = x.view(-1, 16*4*4)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.log_softmax(self.fc3(x), dim=1)
+        x = self.fc3(x)
+        #x = F.log_softmax(x, dim=1)
         return x
