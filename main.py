@@ -15,9 +15,7 @@ ww_file = '/train_WW_preproccesed_data.npy'
 classes = ['QCD', 'WW']
 
 transform = transforms.Compose(
-    [transforms.ToTensor()])
-
-'''transforms.Normalize((0.5), (0.5))])'''
+    [transforms.ToTensor(), transforms.Normalize((0.05), (0.5))])
 
 trainDataset = jetDataset(root+qcd_file, root+ww_file, root, transform=transform)
 
@@ -62,13 +60,13 @@ for epoch in range(2):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
-        loss_list.append(running_loss)
+        loss_list.append(loss.item())
         if i % 2000 == 1999:    # print every 2000 mini-batches
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
 
-plt.plot(loss_list)
+plt.plot(loss_list, '*')
 plt.show()
 print('Finished Training')
 

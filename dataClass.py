@@ -37,6 +37,7 @@ class jetDataset(Dataset):
         self.allLabels.extend(self.labels2)
 
         self.allData = np.array(self.allData)
+        self.allData = np.log(self.allData, out=np.zeros_like(self.allData), where=(self.allData != 0))
         self.allLabels = np.array(self.allLabels)
 
         self.root_dir = root_dir
@@ -70,7 +71,7 @@ def imshow(imgs, labels=None):
     n = len(npimgs)
     fig, ax = plt.subplots(ncols=n)
     for i in range(n):
-        ax[i].imshow(np.abs(npimgs[i]), cmap="jet", norm=LogNorm())
+        ax[i].imshow(np.abs(npimgs[i]), cmap="jet")#, norm=LogNorm())
         if isinstance(labels[i], str):
             ax[i].set_title(labels[i])
     plt.show()
