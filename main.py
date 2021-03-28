@@ -22,12 +22,12 @@ classes = ['QCD', 'WW']
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.05), (0.5))])
 
-trainDataset = jetDataset(root+qcd_file_train, root+qcd_file_train, root, transform=transform)
+trainDataset = jetDataset(root+qcd_file_train, root+ww_file_train, root, transform=transform)
 
 trainloader = torch.utils.data.DataLoader(trainDataset, batch_size=4,
                                           shuffle=True)
 
-testDataset = jetDataset(root+qcd_file_test, root+qcd_file_test, root, transform=transform)
+testDataset = jetDataset(root+qcd_file_test, root+ww_file_test, root, transform=transform)
 
 testloader = torch.utils.data.DataLoader(testDataset, batch_size=4,
                                           shuffle=True)
@@ -84,7 +84,9 @@ for epoch in range(2):  # loop over the dataset multiple times
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
 
-plt.plot(loss_list, '*')
+plt.plot(loss_list, '.', alpha=0.1)
+plt.xlabel('training step')
+plt.ylabel('loss')
 plt.show()
 print('Finished Training')
 
